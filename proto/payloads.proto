@@ -1,0 +1,56 @@
+syntax = "proto3";
+package sspt;
+
+message Pose7 { double x=1; double y=2; double z=3; double qx=4; double qy=5; double qz=6; double qw=7; }
+message InfoMat { repeated double data = 1; } // row-major
+
+message SubmapNode { string id=1; Pose7 pose=2; InfoMat info=3; }
+message Edge { string i=1; string j=2; string type=3; InfoMat info=4; }
+
+message L1Skeleton {
+  string version = 1;
+  string frame_id = 2;
+  double timestamp = 3;
+  repeated SubmapNode submaps = 4;
+  repeated Edge edges = 5;
+}
+
+message VoxelUpdate {
+  repeated int32 ijk = 1; // size=3
+  double dL = 2;
+  double dd = 3;
+  double w_delta = 4;
+  double ts = 5;
+}
+
+message BlockDelta {
+  string block_id = 1;
+  double resolution = 2;
+  repeated VoxelUpdate voxels = 3;
+}
+
+message L2Delta {
+  string version = 1;
+  string frame_id = 2;
+  repeated BlockDelta blocks = 3;
+}
+
+message SemVoxel {
+  repeated int32 ijk = 1;
+  repeated double logit_delta = 2;
+  repeated double dirichlet_delta = 3;
+  string instance_id = 4;
+  repeated string merge_hint = 5;
+}
+
+message SemBlockDelta {
+  string block_id = 1;
+  double resolution = 2;
+  repeated SemVoxel voxels = 3;
+}
+
+message L3Delta {
+  string version = 1;
+  string frame_id = 2;
+  repeated SemBlockDelta blocks = 3;
+}
