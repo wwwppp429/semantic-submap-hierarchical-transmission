@@ -1,0 +1,43 @@
+{
+  "layer": "L1",
+  "version": "v0.1",
+  "frame_id": "world",
+  "timestamp": 1732212345.0,
+  "submaps": [
+    {
+      "id": "robot1_s0",
+      "pose": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "info": [
+        100,
+        0,
+        0,
+        100,
+        0,
+        100
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "i": "robot1_s0",
+      "j": "robot1_s1",
+      "type": "odom",
+      "info": [
+        50,
+        0,
+        0,
+        50,
+        0,
+        50
+      ]
+    }
+  ]
+}

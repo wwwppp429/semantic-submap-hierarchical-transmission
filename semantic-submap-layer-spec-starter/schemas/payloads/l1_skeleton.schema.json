@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "L1 Skeleton Payload",
+  "type": "object",
+  "required": [
+    "layer",
+    "version",
+    "frame_id",
+    "submaps",
+    "edges"
+  ],
+  "properties": {
+    "layer": {
+      "const": "L1"
+    },
+    "version": {
+      "type": "string"
+    },
+    "frame_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "number"
+    },
+    "submaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "pose",
+          "info"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "pose": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 7,
+            "maxItems": 7
+          },
+          "info": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "i",
+          "j",
+          "type",
+          "info"
+        ],
+        "properties": {
+          "i": {
+            "type": "string"
+          },
+          "j": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "odom",
+              "loop"
+            ]
+          },
+          "info": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}
