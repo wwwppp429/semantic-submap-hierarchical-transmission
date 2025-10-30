@@ -2,7 +2,7 @@
 
 This repository defines the **L1/L2/L3** layered encoding for *progressive, prefix-decodable* transmission of **semantic submaps** across multiple robots and a centralized fusion node.At the sametimes,this repository implements the layered model described as Table I in the manuscript.
 
-> We extend the classic progressive (layered + incremental) transmission paradigm to **3D voxel + semantics** and make it compatible with **robust PGO** and **octree occupancy/TSDF fusion**.
+> We extend the classic progressive (layered + incremental) transmission paradigm to **3D voxel + semantics** and make it compatible with **robust PGO** and **octree occupancy fusion**.
 
 ## Layers (TL;DR)
 | Layer | Purpose | Minimal payload (MUST) | Optional (SHOULD/ MAY) |
