@@ -1,0 +1,13 @@
+{
+  "submap_id": "alpha_0007",
+  "robot_id": "robot_alpha",
+  "layer": 2,
+  "version": 1,
+  "stamp": 1730000002000000000,
+  "payload": {
+    "voxels": [
+      {"idx": [12, 6, 3], "logodds_delta": 0.85, "weight": 1.0},
+      {"idx": [12, 6, 4], "logodds_delta": -0.40, "weight": 1.0}
+    ]
+  }
+}
