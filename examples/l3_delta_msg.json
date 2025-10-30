@@ -1,0 +1,13 @@
+{
+  "submap_id": "alpha_0007",
+  "robot_id": "robot_alpha",
+  "layer": 3,
+  "version": 1,
+  "stamp": 1730000003000000000,
+  "payload": {
+    "semantics": [
+      {"idx": [12, 6, 3], "class_delta": {"car": 0.7, "background": -0.7}, "instance": "veh_03"},
+      {"idx": [12, 6, 4], "class_delta": {"pedestrian": 0.5}, "instance": null}
+    ]
+  }
+}
