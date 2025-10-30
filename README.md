@@ -26,10 +26,8 @@ This repository defines the **L1/L2/L3** layered encoding for *progressive, pref
 - `examples/*_msg.json` are **transport-level** messages with the common SSPT header
   (submap_id, robot_id, layer, version, stamp, payload, crc).
 ## Quick demo
-
 To verify that SSPT messages can be applied **out of order** and still build a
 consistent submap state, run:
-
 ```bash
 python scripts/check_order_independence.py
 
