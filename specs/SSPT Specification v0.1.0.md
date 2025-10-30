@@ -1,4 +1,4 @@
-
+#SSPT Specification v0.1.0
 Streamed Submap Progressive Transmission
 
 ## 1. Purpose
