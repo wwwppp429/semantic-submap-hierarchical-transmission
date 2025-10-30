@@ -8,7 +8,7 @@ This repository defines the **L1/L2/L3** layered encoding for *progressive, pref
 | Layer | Purpose | Minimal payload (MUST) | Optional (SHOULD/ MAY) |
 |---|---|---|---|
 | **L1 — Skeleton** | Make a consistent global frame fast | Submap poses, graph edges (odometry/loop closures) with info, time/version | Sparse geometry (key landmarks), calibration digest |
-| **L2 — Geometry Δ** | Coarse geometry for planning/coverage | Octree block IDs, voxel occupancy **ΔL** or TSDF distances **Δd** with weights, block resolution | Colors, normals, timestamps, view angles |
+| **L2 — Geometry Δ** | Coarse geometry for planning/coverage | Octree block IDs, voxel occupancy **ΔL** , block resolution | Colors, normals, timestamps, view angles |
 | **L3 — Semantics Δ** | High-res + semantics | Per-voxel class distribution (logits/probabilities) **Δ**, instance IDs/merge hints, attributes | Relations (scene graph edges), uncertainty stats |
 
 **Prefix-decodable:** Applying `L1 → (L2 Δ)* → (L3 Δ)*` in order yields a valid map at any prefix. Each Δ contains only the *minimal* payload to upgrade from previous level(s).Run scripts/demo_roundtrip.sh to verify order-independence and prefix-decodability.
