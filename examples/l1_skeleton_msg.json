@@ -1,0 +1,15 @@
+{
+  "submap_id": "alpha_0007",
+  "robot_id": "robot_alpha",
+  "layer": 1,
+  "version": 1,
+  "stamp": 1730000001000000000,
+  "payload": {
+    "poses": [
+      {"id": "alpha_0007_root", "T_world_submap": [1,0,0,0, 0,1,0,0, 0,0,1,0]}
+    ],
+    "edges": [
+      {"from": "alpha_0006_root", "to": "alpha_0007_root", "type": "odom", "info": [1000,0,0, 0,1000,0, 0,0,1000]}
+    ]
+  }
+}
