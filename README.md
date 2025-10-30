@@ -2,7 +2,7 @@
 
 This repository defines the **L1/L2/L3** layered encoding for *progressive, prefix-decodable* transmission of **semantic submaps** across multiple robots and a centralized fusion node.
 
-> We extend the classic progressive (layered + incremental) transmission paradigm to **3D voxel/TSDF + semantics** and make it compatible with **robust PGO** and **octree occupancy/TSDF fusion**.
+> We extend the classic progressive (layered + incremental) transmission paradigm to **3D voxel + semantics** and make it compatible with **robust PGO** and **octree occupancy/TSDF fusion**.
 
 ## Layers (TL;DR)
 | Layer | Purpose | Minimal payload (MUST) | Optional (SHOULD/ MAY) |
@@ -11,7 +11,7 @@ This repository defines the **L1/L2/L3** layered encoding for *progressive, pref
 | **L2 — Geometry Δ** | Coarse geometry for planning/coverage | Octree block IDs, voxel occupancy **ΔL** or TSDF distances **Δd** with weights, block resolution | Colors, normals, timestamps, view angles |
 | **L3 — Semantics Δ** | High-res + semantics | Per-voxel class distribution (logits/probabilities) **Δ**, instance IDs/merge hints, attributes | Relations (scene graph edges), uncertainty stats |
 
-**Prefix-decodable:** Applying `L1 → (L2 Δ)* → (L3 Δ)*` in order yields a valid map at any prefix. Each Δ contains only the *minimal* payload to upgrade from previous level(s).
+**Prefix-decodable:** Applying `L1 → (L2 Δ)* → (L3 Δ)*` in order yields a valid map at any prefix. Each Δ contains only the *minimal* payload to upgrade from previous level(s).Run scripts/demo_roundtrip.sh to verify order-independence and prefix-decodability.
 
 ## Files
 - `specs/` — human-readable normative specs (MUST/SHOULD/MAY).
