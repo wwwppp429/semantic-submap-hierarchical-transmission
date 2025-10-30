@@ -12,6 +12,10 @@ This repository defines the **L1/L2/L3** layered encoding for *progressive, pref
 | **L3 — Semantics Δ** | High-res + semantics | Per-voxel class distribution (logits/probabilities) **Δ**, instance IDs/merge hints, attributes | Relations (scene graph edges), uncertainty stats |
 
 **Prefix-decodable:** Applying `L1 → (L2 Δ)* → (L3 Δ)*` in order yields a valid map at any prefix. Each Δ contains only the *minimal* payload to upgrade from previous level(s).Run scripts/demo_roundtrip.sh to verify order-independence and prefix-decodability.
+- `examples/*_example.json` are **payload-only** examples (what the layer actually contains).
+- `examples/*_msg.json` are **transport-level** messages with the common SSPT header
+  (submap_id, robot_id, layer, version, stamp, payload, crc).
+
 
 ## Files
 - `specs/` — human-readable normative specs (MUST/SHOULD/MAY).
