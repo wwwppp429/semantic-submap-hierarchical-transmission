@@ -1,79 +1,51 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
 check_order_independence.py
 
-Very small demo to show that SSPT messages (L1/L2/L3) can be applied
-in arbitrary order and still result in a consistent submap state.
-
-Expected repo layout:
-  examples/
-    l1_skeleton_example.json
-    l2_delta_example.json
-    l3_delta_example.json
+Given a packet set, verify order-independence by:
+- computing a reference hash under name order
+- shuffling many times and checking the same hash
 """
 
-import json
-from pathlib import Path
+import argparse
 import random
+from typing import List
 
-
-# ---- tiny "central-side" state ----
-# state = {
-#   submap_id: {
-#       "l1": {...} or None,
-#       "l2": [ {...}, ... ],   # we just keep all deltas
-#       "l3": [ {...}, ... ]
-#   }
-# }
-def apply_msg(state, msg):
-    layer = msg.get("layer") or msg.get("layer_id")
-    # in examples you used string "L1"/"L2"/"L3"
-    if isinstance(layer, str):
-        layer = layer.upper()
-    submap_id = None
-
-    # 1) try transport-level header
-    if "submap_id" in msg:
-        submap_id = msg["submap_id"]
-        payload = msg.get("payload", {})
-    else:
-        # 2) payload-only example, we fake an id
-        submap_id = "example_submap"
-        payload = msg
-
-    sub_state = state.setdefault(submap_id, {"l1": None, "l2": [], "l3": []})
-
-    if layer in (1, "L1"):
-        sub_state["l1"] = payload
-    elif layer in (2, "L2"):
-        sub_state["l2"].append(payload)
-    elif layer in (3, "L3"):
-        sub_state["l3"].append(payload)
-    else:
-        print(f"[warn] unknown layer: {layer}")
+from merge_demo import load_packets, fuse_packets, state_hash
 
 
 def main():
-    base = Path(__file__).resolve().parents[1] / "examples"
-    candidates = [
-        base / "l1_skeleton_example.json",
-        base / "l2_delta_example.json",
-        base / "l3_delta_example.json",
-    ]
-    # load all
-    msgs = [json.loads(p.read_text()) for p in candidates]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--inputs", nargs="+", help="packet json files/dirs")
+    ap.add_argument("--trials", type=int, default=50)
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--n_vox", type=int, default=2000)
+    ap.add_argument("--num_classes", type=int, default=10)
+    args = ap.parse_args()
 
-    # shuffle to simulate out-of-order arrival
-    random.shuffle(msgs)
+    pkts = load_packets(args.inputs)
+    # reference: name order (load_packets already sorts in dir mode)
+    occ0, sem0 = fuse_packets(pkts, args.n_vox, args.num_classes)
+    h0 = state_hash(occ0, sem0)
+    print("[REF]", h0)
 
-    state = {}
-    for m in msgs:
-        apply_msg(state, m)
+    rnd = random.Random(args.seed)
+    for t in range(args.trials):
+        pkts2 = list(pkts)
+        rnd.shuffle(pkts2)
+        occ, sem = fuse_packets(pkts2, args.n_vox, args.num_classes)
+        h = state_hash(occ, sem)
+        if h != h0:
+            print(f"[FAIL] trial={t} hash={h} != ref")
+            raise SystemExit(1)
+        if (t + 1) % 10 == 0:
+            print(f"[OK]   {t+1}/{args.trials}")
 
-    # pretty-print final state
-    print(json.dumps(state, indent=2))
-    print("\n[ok] applied in order:", [m.get("layer") for m in msgs])
+    print("[PASS] order-independence holds for all trials.")
 
 
 if __name__ == "__main__":
     main()
+
