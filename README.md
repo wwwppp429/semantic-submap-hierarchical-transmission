@@ -54,7 +54,7 @@ This repository defines the L1/L2/L3 layered encoding for progressive, prefix-de
   (submap_id, robot_id, layer, version, stamp, payload, crc).
 ## Quick demo
 To verify that SSHT messages can be applied **out of order** and still build a
-consistent submap state, Run the following command to verify order-independence and prefix-decodability:
+consistent submap state, run the following command to verify order-independence and prefix-decodability:
 ```bash
 python scripts/check_order_independence.py
 
