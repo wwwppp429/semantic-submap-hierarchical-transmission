@@ -1,4 +1,4 @@
-# Semantic Submap Progressive Transmission (SSPT) — Layered & Prefix-Decodable Spec
+# Semantic Submap Hierarchical Transmission (SSPT) — Layered & Prefix-Decodable Spec
 
 This repository defines the **L1/L2/L3** layered encoding for *progressive, prefix-decodable* transmission of **semantic submaps** across multiple robots and a centralized fusion node.At the sametimes,this repository implements the layered model described as Table I in the manuscript.
 
