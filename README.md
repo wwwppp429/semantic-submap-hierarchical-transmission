@@ -19,19 +19,22 @@ to explain *why and how hierarchical (prefix-decodable) transmission is used* un
 ## Figures
 
 <p align="center">
-  <img src="diagrams/zt.png" width="95%">
+  <a href="diagrams/zt.png">
+    <img src="diagrams/zt.png" width="95%"/>
+  </a>
 </p>
 
 <p align="center">
-  <img src="diagrams/L1.png" width="32%">
-  <img src="diagrams/L2.png" width="32%">
-  <img src="diagrams/L3.png" width="32%">
+  <a href="diagrams/L1.png"><img src="diagrams/L1.png" width="32%"/></a>
+  <a href="diagrams/L2.png"><img src="diagrams/L2.png" width="32%"/></a>
+  <a href="diagrams/L3.png"><img src="diagrams/L3.png" width="32%"/></a>
 </p>
 
 <p align="center">
-  <img src="diagrams/q1.png" width="48%">
-  <img src="diagrams/q2.png" width="48%">
+  <a href="diagrams/q1.png"><img src="diagrams/q1.png" width="48%"/></a>
+  <a href="diagrams/q2.png"><img src="diagrams/q2.png" width="48%"/></a>
 </p>
+
 
 
 
