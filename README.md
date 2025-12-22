@@ -2,9 +2,14 @@
 
 This repository defines the L1/L2/L3 layered encoding for progressive, prefix-decodable transmission of semantic submaps in centralized multi-robot mapping. It implements the layered model described in Table I of our manuscript.
 
-## Scope
-- C++: core mapping/fusion prototype (not fully released here).
-- This repo: layered transmission spec (L1/L2/L3), schemas/protobuf, and validation + plotting scripts in Python.
+## Scope (Important)
+This repository is **not** the full system code of the paper.
+It is a lightweight companion repo that provides **figures and a concise layered-submap specification**
+to illustrate *why and how hierarchical (L1/L2/L3) transmission is used* under bandwidth constraints.
+
+- Full mapping system: implemented in C++ (not included here).
+- This repo: figures + spec notes + small sanity-check scripts (optional).
+
 
 
 **Paper / Preprint:** (add link here)
@@ -57,7 +62,9 @@ This repository defines the L1/L2/L3 layered encoding for progressive, prefix-de
 - `examples/*_example.json` are **payload-only** examples (what the layer actually contains).
 - `examples/*_msg.json` are **transport-level** messages with the common SSPT header
   (submap_id, robot_id, layer, version, stamp, payload, crc).
-## Quick demo
+## Optional sanity check (toy example)
+This toy script only checks prefix-decodability / order-independence of the layered message format,
+and does **not** reproduce the full SLAM pipeline.
 To verify that SSHT messages can be applied **out of order** and still build a
 consistent submap state, run the following command to verify order-independence and prefix-decodability:
 ```bash
