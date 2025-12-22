@@ -4,11 +4,12 @@ This repository defines the L1/L2/L3 layered encoding for progressive, prefix-de
 
 ## Scope (Important)
 This repository is **not** the full system code of the paper.
-It is a lightweight companion repo that provides **figures and a concise layered-submap specification**
-to illustrate *why and how hierarchical (L1/L2/L3) transmission is used* under bandwidth constraints.
+It is a lightweight companion repo that provides **figures + a concise L1/L2/L3 layered-submap specification**
+to explain *why and how hierarchical (prefix-decodable) transmission is used* under bandwidth constraints.
 
 - Full mapping system: implemented in C++ (not included here).
-- This repo: figures + spec notes + small sanity-check scripts (optional).
+- This repo: figures, schemas/proto, examples, and small sanity-check scripts (optional).
+
 
 
 
@@ -51,6 +52,8 @@ to illustrate *why and how hierarchical (L1/L2/L3) transmission is used* under b
 
 
 
+
+
 ## Files
 - `specs/` — human-readable normative specs (MUST/SHOULD/MAY).
 - `schemas/` — JSON Schemas for payload validation.
@@ -63,10 +66,9 @@ to illustrate *why and how hierarchical (L1/L2/L3) transmission is used* under b
 - `examples/*_msg.json` are **transport-level** messages with the common SSPT header
   (submap_id, robot_id, layer, version, stamp, payload, crc).
 ## Optional sanity check (toy example)
-This toy script only checks prefix-decodability / order-independence of the layered message format,
+This toy script only checks prefix-decodability / order-independence of the message format,
 and does **not** reproduce the full SLAM pipeline.
-To verify that SSHT messages can be applied **out of order** and still build a
-consistent submap state, run the following command to verify order-independence and prefix-decodability:
+
 ```bash
 python scripts/check_order_independence.py
 
