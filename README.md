@@ -2,6 +2,11 @@
 
 This repository defines the L1/L2/L3 layered encoding for progressive, prefix-decodable transmission of semantic submaps in centralized multi-robot mapping. It implements the layered model described in Table I of our manuscript.
 
+## Scope
+- C++: core mapping/fusion prototype (not fully released here).
+- This repo: layered transmission spec (L1/L2/L3), schemas/protobuf, and validation + plotting scripts in Python.
+
+
 **Paper / Preprint:** (add link here)
 **Repository:** (this page)
 
