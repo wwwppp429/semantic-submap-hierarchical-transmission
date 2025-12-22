@@ -1,38 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
-ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PKT_DIR="${ROOT_DIR}/demo_packets"
+NPZ="${1:-results/scan0000/scannet_mesh_scene0000_00_vox5cm_layers_robot.npz}"
+OUTDIR="${2:-trace}"
+ROBOT="${3:-0}"
 
-echo "[1/4] generate demo packets..."
-python3 "${ROOT_DIR}/scripts/merge_demo.py" \
-  --make_demo \
-  --out_dir "${PKT_DIR}" \
-  --seed 0 \
-  --n_vox 2000 \
-  --num_classes 10 \
-  --n_submaps 4 \
-  --n_per_layer 200
+TRACE="${OUTDIR}/scene_trace_r${ROBOT}.jsonl"
+
+echo "[1/4] export trace..."
+python3 scripts/export_trace.py \
+  --npz "${NPZ}" \
+  --out "${TRACE}" \
+  --robot "${ROBOT}" \
+  --max_packets 120 \
+  --packet_voxels 256
 
 echo "[2/4] validate json + crc..."
-python3 "${ROOT_DIR}/scripts/validate_json.py" "${PKT_DIR}"
+python3 scripts/validate_json.py "${TRACE}"
 
-echo "[3/4] merge in name order (reference hash)..."
-python3 "${ROOT_DIR}/scripts/merge_demo.py" \
-  --inputs "${PKT_DIR}" \
-  --order name \
-  --n_vox 2000 \
-  --num_classes 10
+echo "[3/4] merge (original order) ..."
+python3 scripts/merge_demo.py "${TRACE}" --out_json "${OUTDIR}/merge_summary_r${ROBOT}.json"
 
-echo "[4/4] check order-independence..."
-# ensure scripts/ is on PYTHONPATH for the import
-PYTHONPATH="${ROOT_DIR}/scripts:${PYTHONPATH}" \
-python3 "${ROOT_DIR}/scripts/check_order_independence.py" \
-  --inputs "${PKT_DIR}" \
-  --trials 50 \
-  --seed 0 \
-  --n_vox 2000 \
-  --num_classes 10
+echo "[4/4] check order-independence ..."
+python3 scripts/check_order_independence.py "${TRACE}" --trials 50
 
 echo "[DONE] all checks passed."
-
