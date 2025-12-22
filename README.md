@@ -1,6 +1,9 @@
-# Semantic Submap Hierarchical Transmission (SSPT) — Layered & Prefix-Decodable Spec
+# Semantic Submap Hierarchical Transmission (SSHT) — Layered & Prefix-Decodable Spec
 
-This repository defines the **L1/L2/L3** layered encoding for *progressive, prefix-decodable* transmission of **semantic submaps** across multiple robots and a centralized fusion node.At the sametimes,this repository implements the layered model described as Table I in the manuscript.
+This repository defines the L1/L2/L3 layered encoding for progressive, prefix-decodable transmission of semantic submaps in centralized multi-robot mapping. It implements the layered model described in Table I of our manuscript.
+
+**Paper / Preprint:** (add link here)
+**Repository:** (this page)
 
 ## Figures
 
@@ -23,14 +26,16 @@ This repository defines the **L1/L2/L3** layered encoding for *progressive, pref
 
 > We extend the classic progressive (layered + incremental) transmission paradigm to **3D voxel + semantics** and make it compatible with **robust PGO** and **octree occupancy fusion**.
 
-## Layers (TL;DR)
-| Layer | Purpose | Minimal payload (MUST) | Optional (SHOULD/ MAY) |
+| Layer | Purpose | Minimal payload (MUST) | Optional (SHOULD/MAY) |
 |---|---|---|---|
-| **L1 — Skeleton** | Make a consistent global frame fast | Submap poses, graph edges (odometry/loop closures) with info, time/version | Sparse geometry (key landmarks), calibration digest |
-| **L2 — Geometry Δ** | Coarse geometry for planning/coverage | Octree block IDs, voxel occupancy **ΔL** , block resolution | Colors, normals, timestamps, view angles |
-| **L3 — Semantics Δ** | High-res + semantics | Per-voxel class distribution (logits/probabilities) **Δ**, instance IDs/merge hints, attributes | Relations (scene graph edges), uncertainty stats |
+| **L1 — Skeleton** | Make a consistent global frame fast | Submap poses; graph edges (odometry/loop closures) with info; time/version | Sparse geometry preview; calibration digest |
+| **L2 — Geometry Δ** | Coarse geometry for planning/coverage | Octree block IDs; voxel occupancy ΔL; block resolution | Colors/normals; timestamps; view angles |
+| **L3 — Semantics Δ** | High-res + semantics | Per-voxel class distribution (logits/probabilities) Δ; instance IDs/merge hints; attributes | Relations (scene graph edges); uncertainty stats |
 
-**Prefix-decodable:** Applying `L1 → (L2 Δ)* → (L3 Δ)*` in order yields a valid map at any prefix. Each Δ contains only the *minimal* payload to upgrade from previous level(s).Run scripts/demo_roundtrip.sh to verify order-independence and prefix-decodability.
+**Prefix-decodable:** Applying `L1 → (L2 Δ)* → (L3 Δ)*` yields a valid map at any prefix.
+
+
+
 
 
 
@@ -48,8 +53,8 @@ This repository defines the **L1/L2/L3** layered encoding for *progressive, pref
 - `examples/*_msg.json` are **transport-level** messages with the common SSPT header
   (submap_id, robot_id, layer, version, stamp, payload, crc).
 ## Quick demo
-To verify that SSPT messages can be applied **out of order** and still build a
-consistent submap state, run:
+To verify that SSHT messages can be applied **out of order** and still build a
+consistent submap state, Run the following command to verify order-independence and prefix-decodability:
 ```bash
 python scripts/check_order_independence.py
 
