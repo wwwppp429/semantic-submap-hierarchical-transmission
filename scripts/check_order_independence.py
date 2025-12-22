@@ -1,51 +1,64 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
 check_order_independence.py
 
-Given a packet set, verify order-independence by:
-- computing a reference hash under name order
-- shuffling many times and checking the same hash
+Run multiple shuffle trials and verify final merged state hash is identical.
+
+Run:
+  python3 scripts/check_order_independence.py trace/scene0000_00_r0.jsonl --trials 50
 """
 
 import argparse
-import random
-from typing import List
+import json
+from pathlib import Path
+from typing import Any, Dict, List
 
-from merge_demo import load_packets, fuse_packets, state_hash
+import numpy as np
+
+from merge_demo import merge_trace, state_hash  # reuse logic
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--inputs", nargs="+", help="packet json files/dirs")
+    ap.add_argument("trace", help="trace.jsonl")
     ap.add_argument("--trials", type=int, default=50)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--n_vox", type=int, default=2000)
-    ap.add_argument("--num_classes", type=int, default=10)
     args = ap.parse_args()
 
-    pkts = load_packets(args.inputs)
-    # reference: name order (load_packets already sorts in dir mode)
-    occ0, sem0 = fuse_packets(pkts, args.n_vox, args.num_classes)
-    h0 = state_hash(occ0, sem0)
-    print("[REF]", h0)
+    path = Path(args.trace)
+    packets: List[Dict[str, Any]] = []
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            packets.append(json.loads(line))
 
-    rnd = random.Random(args.seed)
+    rng = np.random.RandomState(args.seed)
+
+    # Reference (original order)
+    logodds0, sem0 = merge_trace(packets)
+    href = state_hash(logodds0, sem0)
+
+    ok = True
     for t in range(args.trials):
-        pkts2 = list(pkts)
-        rnd.shuffle(pkts2)
-        occ, sem = fuse_packets(pkts2, args.n_vox, args.num_classes)
-        h = state_hash(occ, sem)
-        if h != h0:
-            print(f"[FAIL] trial={t} hash={h} != ref")
-            raise SystemExit(1)
-        if (t + 1) % 10 == 0:
-            print(f"[OK]   {t+1}/{args.trials}")
+        pk = list(packets)
+        rng.shuffle(pk)
+        lo, se = merge_trace(pk)
+        h = state_hash(lo, se)
+        if h != href:
+            print(f"[FAIL] trial={t} hash mismatch!")
+            print(f"       ref={href}")
+            print(f"       got={h}")
+            ok = False
+            break
 
-    print("[PASS] order-independence holds for all trials.")
+    if ok:
+        print(f"[OK] order-independence verified: trials={args.trials}, sha256={href}")
+    else:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
     main()
-
