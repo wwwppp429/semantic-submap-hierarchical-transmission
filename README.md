@@ -2,6 +2,25 @@
 
 This repository defines the **L1/L2/L3** layered encoding for *progressive, prefix-decodable* transmission of **semantic submaps** across multiple robots and a centralized fusion node.At the sametimes,this repository implements the layered model described as Table I in the manuscript.
 
+## Figures
+
+<p align="center">
+  <img src="diagrams/zt.png" width="95%">
+</p>
+
+<p align="center">
+  <img src="diagrams/L1.png" width="32%">
+  <img src="diagrams/L2.png" width="32%">
+  <img src="diagrams/L3.png" width="32%">
+</p>
+
+<p align="center">
+  <img src="diagrams/q1.png" width="48%">
+  <img src="diagrams/q2.png" width="48%">
+</p>
+
+
+
 > We extend the classic progressive (layered + incremental) transmission paradigm to **3D voxel + semantics** and make it compatible with **robust PGO** and **octree occupancy fusion**.
 
 ## Layers (TL;DR)
@@ -12,6 +31,9 @@ This repository defines the **L1/L2/L3** layered encoding for *progressive, pref
 | **L3 — Semantics Δ** | High-res + semantics | Per-voxel class distribution (logits/probabilities) **Δ**, instance IDs/merge hints, attributes | Relations (scene graph edges), uncertainty stats |
 
 **Prefix-decodable:** Applying `L1 → (L2 Δ)* → (L3 Δ)*` in order yields a valid map at any prefix. Each Δ contains only the *minimal* payload to upgrade from previous level(s).Run scripts/demo_roundtrip.sh to verify order-independence and prefix-decodability.
+
+
+
 
 
 ## Files
