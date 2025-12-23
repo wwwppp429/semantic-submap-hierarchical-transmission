@@ -1,11 +1,13 @@
 ![smoke](https://github.com/wwwppp429/semantic-submap-hierarchical-transmission/actions/workflows/smoke.yml/badge.svg)
 
 # Semantic Submap Hierarchical Transmission (SSHT)
+
 **Layered & prefix-decodable specification** for progressive transmission of semantic submaps in centralized multi-robot mapping.
 
 This repository defines the **L1/L2/L3** layered encoding described in **Table I** of our manuscript.
 
 ## Scope (Important)
+
 This repository is **not** the full system code of the paper.  
 It is a lightweight companion repo that provides **figures + a concise L1/L2/L3 layered-submap specification** to explain *why and how hierarchical (prefix-decodable) transmission is used* under bandwidth constraints.
 
@@ -14,10 +16,6 @@ It is a lightweight companion repo that provides **figures + a concise L1/L2/L3 
 
 **Paper / Preprint:** (add link here)  
 **Repository:** https://github.com/wwwppp429/semantic-submap-hierarchical-transmission
-
-
-
-
 
 ---
 
@@ -78,14 +76,13 @@ Notes:
 
 ---
 
-
-
 ## Optional sanity check (toy example)
 
 This toy script only checks **prefix-decodability / order-independence** of the message format, and does **not** reproduce the full SLAM pipeline.
 
 ```bash
 python scripts/check_order_independence.py --trace trace/trace_demo.jsonl
+```
 
 ## Quick start (dataset-free sanity check)
 
@@ -98,13 +95,16 @@ This repo includes a small, **dataset-free** sanity check that validates the key
 python3 -m venv .venv
 source .venv/bin/activate
 bash scripts/demo_roundtrip.sh
+```
 
-
-
+```md
+## License
 
 MIT. See `LICENSE`.
 
-## Citation
+#
+# Citation
+
 See `CITATION.cff`.
 
 
