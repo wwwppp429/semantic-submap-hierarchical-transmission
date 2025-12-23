@@ -15,6 +15,22 @@ It is a lightweight companion repo that provides **figures + a concise L1/L2/L3 
 **Paper / Preprint:** (add link here)  
 **Repository:** https://github.com/wwwppp429/semantic-submap-hierarchical-transmission
 
+## Quick start (dataset-free sanity check)
+
+This repo includes a small, **dataset-free** sanity check that validates the key protocol properties claimed in the paper:
+
+- **CRC-valid packets** (canonical JSON + crc32)
+- **Prefix-decodable / order-independent fusion**: shuffling packet order yields identical merged results
+
+### Run
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+bash scripts/demo_roundtrip.sh
+
+
+
 ---
 
 ## Figures
