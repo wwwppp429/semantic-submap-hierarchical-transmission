@@ -1,3 +1,5 @@
+![smoke](https://github.com/wwwppp429/semantic-submap-hierarchical-transmission/actions/workflows/smoke.yml/badge.svg)
+
 # Semantic Submap Hierarchical Transmission (SSHT)
 **Layered & prefix-decodable specification** for progressive transmission of semantic submaps in centralized multi-robot mapping.
 
