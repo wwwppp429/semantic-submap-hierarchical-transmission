@@ -1,27 +1,23 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-NPZ="${1:-results/scan0000/scannet_mesh_scene0000_00_vox5cm_layers_robot.npz}"
-OUTDIR="${2:-trace}"
-ROBOT="${3:-0}"
+# Run from repo root
+python -m pip install -r requirements.txt
 
-TRACE="${OUTDIR}/scene_trace_r${ROBOT}.jsonl"
+mkdir -p trace out
 
-echo "[1/4] export trace..."
-python3 scripts/export_trace.py \
-  --npz "${NPZ}" \
-  --out "${TRACE}" \
-  --robot "${ROBOT}" \
-  --max_packets 120 \
-  --packet_voxels 256
+TRACE="trace/trace_demo.jsonl"
 
-echo "[2/4] validate json + crc..."
-python3 scripts/validate_json.py "${TRACE}"
+# 1) Generate a small trace (dataset-free)
+python scripts/export_trace.py --out "${TRACE}" --n_packets 200 --seed 0
 
-echo "[3/4] merge (original order) ..."
-python3 scripts/merge_demo.py "${TRACE}" --out_json "${OUTDIR}/merge_summary_r${ROBOT}.json"
+# 2) Validate JSON + CRC
+python scripts/validate_json.py "${TRACE}"
 
-echo "[4/4] check order-independence ..."
-python3 scripts/check_order_independence.py "${TRACE}" --trials 50
+# 3) Check order-independence (shuffle)
+python scripts/check_order_independence.py --trace "${TRACE}" --n_shuffles 20 --seed 0
 
-echo "[DONE] all checks passed."
+# 4) Merge once and export a tiny artifact
+python scripts/merge_demo.py --trace "${TRACE}" --out_npz out/merged_demo.npz
+
+echo "[OK] demo roundtrip finished."
