@@ -1,0 +1,11 @@
+# python venv
+.venv/
+
+# python cache
+__pycache__/
+*.pyc
+scripts/__pycache__/
+
+# generated outputs
+out/
+trace/

@@ -3,10 +3,12 @@
 
 """
 Merge packets in a trace using commutative/associative rules:
-- L2: quantized log-odds additive + clamp (exact integer math)
-- L3: per-voxel class histogram vote (commutative)
 
-Outputs: out/merged_demo.npz (for inspection)
+- L2: accumulate quantized log-odds deltas with exact integer addition (np.add.at),
+      then apply ONE final clamp at the end.
+- L3: per-voxel class histogram vote via np.add.at (commutative).
+
+This design ensures order-independence under packet shuffling.
 """
 
 import argparse
@@ -51,7 +53,10 @@ def merge_packets(header: Dict[str, Any], packets: List[Dict[str, Any]]) -> Dict
     lmax_q = int(header["lmax_q"])
     n_classes = int(header["n_classes"])
 
-    Lq = np.zeros(n_vox, dtype=np.int32)
+    # Raw accumulator (unclamped) -> order-independent
+    Lq_raw = np.zeros(n_vox, dtype=np.int32)
+
+    # Semantic vote counts
     sem_cnt = np.zeros((n_vox, n_classes), dtype=np.uint16)
 
     for pkt in packets:
@@ -65,18 +70,23 @@ def merge_packets(header: Dict[str, Any], packets: List[Dict[str, Any]]) -> Dict
         if kind == "L2_occ_delta":
             idx = b64z_unpack_ndarray(payload["indices"]).astype(np.int64)
             delta_q = b64z_unpack_ndarray(payload["delta_q"]).astype(np.int32)
-            Lq[idx] += delta_q
-            np.clip(Lq, -lmax_q, lmax_q, out=Lq)
+
+            # IMPORTANT: use add.at to correctly handle repeated indices
+            np.add.at(Lq_raw, idx, delta_q)
 
         elif kind == "L3_sem_delta":
             idx = b64z_unpack_ndarray(payload["indices"]).astype(np.int64)
             sem = b64z_unpack_ndarray(payload["sem"]).astype(np.int64)
             sem = np.clip(sem, 0, n_classes - 1)
-            sem_cnt[idx, sem] += 1
+
+            # IMPORTANT: use add.at for repeated (idx, sem) pairs
+            np.add.at(sem_cnt, (idx, sem), 1)
 
         else:
-            # ignore unknown payload
             continue
+
+    # ONE final clamp => commutative/associative overall
+    Lq = np.clip(Lq_raw, -lmax_q, lmax_q).astype(np.int32)
 
     sem_label = sem_cnt.argmax(axis=1).astype(np.uint16)
     occ_bin = (Lq > 0).astype(np.uint8)
