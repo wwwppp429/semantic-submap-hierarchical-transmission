@@ -1,132 +1,119 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
-merge_demo.py
+Merge packets in a trace using commutative/associative rules:
+- L2: quantized log-odds additive + clamp (exact integer math)
+- L3: per-voxel class histogram vote (commutative)
 
-Merge packets in given order (or shuffled) using commutative/associative rules:
-  - occ_logodds_delta: logodds[idx] += delta, then clamp
-  - sem_hist_delta: sem_count[idx, class] += count
-
-Outputs:
-  - prints final state hash
-  - optionally dumps a small summary json
-
-Run:
-  python3 scripts/merge_demo.py trace/scene0000_00_r0.jsonl --shuffle --seed 0
+Outputs: out/merged_demo.npz (for inspection)
 """
 
 import argparse
 import base64
-import hashlib
 import json
+import os
 import zlib
-from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
 
-def _unpack_array(packed: Dict[str, Any]) -> np.ndarray:
-    if "raw" in packed:
-        return np.asarray(packed["raw"])
-    if "zlib_b64" in packed:
-        c = base64.b64decode(packed["zlib_b64"].encode("ascii"))
-        b = zlib.decompress(c)
-        dtype = np.dtype(packed["dtype"])
-        n = int(packed["n"])
-        return np.frombuffer(b, dtype=dtype, count=n)
-    raise ValueError("unknown packed array format")
+def b64z_unpack_ndarray(obj: Dict[str, Any]) -> np.ndarray:
+    if obj.get("codec") != "b64z":
+        raise ValueError("Unsupported codec (expected b64z)")
+    dtype = np.dtype(obj["dtype"])
+    shape = tuple(obj["shape"])
+    raw = zlib.decompress(base64.b64decode(obj["data"].encode("ascii")))
+    return np.frombuffer(raw, dtype=dtype).reshape(shape)
 
 
-def state_hash(logodds: Dict[int, float], sem_counts: Dict[int, Dict[int, int]]) -> str:
-    h = hashlib.sha256()
-    # Occ
-    for k in sorted(logodds.keys()):
-        h.update(f"o:{k}:{logodds[k]:.6f}\n".encode("utf-8"))
-    # Sem
-    for vidx in sorted(sem_counts.keys()):
-        inner = sem_counts[vidx]
-        for c in sorted(inner.keys()):
-            h.update(f"s:{vidx}:{c}:{inner[c]}\n".encode("utf-8"))
-    return h.hexdigest()
-
-
-def merge_trace(packets: List[Dict[str, Any]]) -> Tuple[Dict[int, float], Dict[int, Dict[int, int]]]:
-    logodds: Dict[int, float] = {}
-    sem_counts: Dict[int, Dict[int, int]] = {}
-
-    for pkt in packets:
-        payload = pkt["payload"]
-        ptype = payload["type"]
-
-        if ptype == "occ_logodds_delta":
-            idx = _unpack_array(payload["indices"]).astype(np.int64)
-            dlt = _unpack_array(payload["delta_logodds"]).astype(np.float32)
-            clamp = payload.get("clamp", {"min": -10.0, "max": 10.0})
-            mn = float(clamp.get("min", -10.0))
-            mx = float(clamp.get("max", 10.0))
-            for i, dv in zip(idx.tolist(), dlt.tolist()):
-                v = float(logodds.get(int(i), 0.0) + float(dv))
-                v = max(mn, min(mx, v))
-                logodds[int(i)] = v
-
-        elif ptype == "sem_hist_delta":
-            idx = _unpack_array(payload["indices"]).astype(np.int64)
-            cls = _unpack_array(payload["class_id"]).astype(np.int64)
-            count = int(payload.get("count", 1))
-            for i, c in zip(idx.tolist(), cls.tolist()):
-                i = int(i)
-                c = int(c)
-                if i not in sem_counts:
-                    sem_counts[i] = {}
-                sem_counts[i][c] = int(sem_counts[i].get(c, 0) + count)
-
-        else:
-            raise ValueError(f"Unknown payload type: {ptype}")
-
-    return logodds, sem_counts
-
-
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("trace", help="trace.jsonl")
-    ap.add_argument("--shuffle", action="store_true")
-    ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--out_json", default="", help="Optional summary output path")
-    args = ap.parse_args()
-
-    path = Path(args.trace)
+def load_trace(trace_path: str) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    header = None
     packets: List[Dict[str, Any]] = []
-    with path.open("r", encoding="utf-8") as f:
+    with open(trace_path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
-            packets.append(json.loads(line))
+            obj = json.loads(line)
+            if obj.get("type") == "header":
+                header = obj
+            elif obj.get("type") == "packet":
+                packets.append(obj)
+    if header is None:
+        raise RuntimeError("Missing header in trace")
+    return header, packets
+
+
+def merge_packets(header: Dict[str, Any], packets: List[Dict[str, Any]]) -> Dict[str, Any]:
+    n_vox = int(header["n_vox"])
+    lmax_q = int(header["lmax_q"])
+    n_classes = int(header["n_classes"])
+
+    Lq = np.zeros(n_vox, dtype=np.int32)
+    sem_cnt = np.zeros((n_vox, n_classes), dtype=np.uint16)
+
+    for pkt in packets:
+        layer = int(pkt["layer"])
+        payload = pkt["payload"]
+        kind = payload.get("kind", "")
+
+        if layer == 1:
+            continue
+
+        if kind == "L2_occ_delta":
+            idx = b64z_unpack_ndarray(payload["indices"]).astype(np.int64)
+            delta_q = b64z_unpack_ndarray(payload["delta_q"]).astype(np.int32)
+            Lq[idx] += delta_q
+            np.clip(Lq, -lmax_q, lmax_q, out=Lq)
+
+        elif kind == "L3_sem_delta":
+            idx = b64z_unpack_ndarray(payload["indices"]).astype(np.int64)
+            sem = b64z_unpack_ndarray(payload["sem"]).astype(np.int64)
+            sem = np.clip(sem, 0, n_classes - 1)
+            sem_cnt[idx, sem] += 1
+
+        else:
+            # ignore unknown payload
+            continue
+
+    sem_label = sem_cnt.argmax(axis=1).astype(np.uint16)
+    occ_bin = (Lq > 0).astype(np.uint8)
+
+    return {"Lq": Lq, "sem_label": sem_label, "occ_bin": occ_bin}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--trace", required=True)
+    ap.add_argument("--shuffle", action="store_true")
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--out_npz", default="out/merged_demo.npz")
+    args = ap.parse_args()
+
+    header, packets = load_trace(args.trace)
 
     if args.shuffle:
         rng = np.random.RandomState(args.seed)
         rng.shuffle(packets)
 
-    logodds, sem_counts = merge_trace(packets)
-    h = state_hash(logodds, sem_counts)
+    out = merge_packets(header, packets)
 
-    print(f"[OK] merged packets={len(packets)}")
-    print(f"     occ_vox={len(logodds)}, sem_vox={len(sem_counts)}")
-    print(f"     state_sha256={h}")
+    os.makedirs(os.path.dirname(args.out_npz), exist_ok=True)
+    np.savez_compressed(
+        args.out_npz,
+        Lq=out["Lq"],
+        sem_label=out["sem_label"],
+        occ_bin=out["occ_bin"],
+        n_vox=int(header["n_vox"]),
+        lmax_q=int(header["lmax_q"]),
+        q_scale=int(header["q_scale"]),
+        n_classes=int(header["n_classes"]),
+    )
 
-    if args.out_json:
-        outp = Path(args.out_json)
-        outp.parent.mkdir(parents=True, exist_ok=True)
-        # small summary only
-        summary = {
-            "packets": len(packets),
-            "occ_vox": len(logodds),
-            "sem_vox": len(sem_counts),
-            "state_sha256": h,
-        }
-        outp.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-        print(f"[OK] wrote {outp}")
+    print(f"[OK] merged -> {args.out_npz}")
+    print(f"     occ_bin_mean={float(out['occ_bin'].mean()):.4f}, unique_sem={len(np.unique(out['sem_label']))}")
 
 
 if __name__ == "__main__":
