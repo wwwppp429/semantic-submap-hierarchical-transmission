@@ -1,63 +1,56 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 """
-check_order_independence.py
+Order-independence test for the trace merge.
 
-Run multiple shuffle trials and verify final merged state hash is identical.
-
-Run:
-  python3 scripts/check_order_independence.py trace/scene0000_00_r0.jsonl --trials 50
+Runs merge in original order and in multiple random shuffled orders.
+Asserts outputs are exactly identical (L2 integer log-odds + L3 histogram vote).
 """
 
 import argparse
-import json
-from pathlib import Path
-from typing import Any, Dict, List
+import os
+import sys
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from merge_demo import merge_trace, state_hash  # reuse logic
+# Ensure scripts/ is importable when run from repo root.
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+if THIS_DIR not in sys.path:
+    sys.path.insert(0, THIS_DIR)
+
+from merge_demo import load_trace, merge_packets  # noqa: E402
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("trace", help="trace.jsonl")
-    ap.add_argument("--trials", type=int, default=50)
+    ap.add_argument("--trace", required=True)
+    ap.add_argument("--n_shuffles", type=int, default=20)
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
-    path = Path(args.trace)
-    packets: List[Dict[str, Any]] = []
-    with path.open("r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            packets.append(json.loads(line))
+    header, packets = load_trace(args.trace)
+
+    ref = merge_packets(header, packets)
+    ref_Lq = ref["Lq"].copy()
+    ref_sem = ref["sem_label"].copy()
+    ref_occ = ref["occ_bin"].copy()
 
     rng = np.random.RandomState(args.seed)
-
-    # Reference (original order)
-    logodds0, sem0 = merge_trace(packets)
-    href = state_hash(logodds0, sem0)
-
-    ok = True
-    for t in range(args.trials):
+    for i in range(args.n_shuffles):
         pk = list(packets)
         rng.shuffle(pk)
-        lo, se = merge_trace(pk)
-        h = state_hash(lo, se)
-        if h != href:
-            print(f"[FAIL] trial={t} hash mismatch!")
-            print(f"       ref={href}")
-            print(f"       got={h}")
-            ok = False
-            break
+        out = merge_packets(header, pk)
 
-    if ok:
-        print(f"[OK] order-independence verified: trials={args.trials}, sha256={href}")
-    else:
-        raise SystemExit(1)
+        if not np.array_equal(out["Lq"], ref_Lq):
+            raise RuntimeError(f"Mismatch in Lq at shuffle {i}")
+        if not np.array_equal(out["sem_label"], ref_sem):
+            raise RuntimeError(f"Mismatch in sem_label at shuffle {i}")
+        if not np.array_equal(out["occ_bin"], ref_occ):
+            raise RuntimeError(f"Mismatch in occ_bin at shuffle {i}")
+
+    print(f"[OK] order-independence verified with {args.n_shuffles} shuffles.")
 
 
 if __name__ == "__main__":
