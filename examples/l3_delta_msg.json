@@ -4,10 +4,35 @@
   "layer": 3,
   "version": 1,
   "stamp": 1730000003000000000,
+
   "payload": {
-    "semantics": [
-      {"idx": [12, 6, 3], "class_delta": {"car": 0.7, "background": -0.7}, "instance": "veh_03"},
-      {"idx": [12, 6, 4], "class_delta": {"pedestrian": 0.5}, "instance": null}
+    "spec_version": "0.1.0",
+    "frame_id": "world",
+
+    "blocks": [
+      {
+        "block_id": "b_12_5_9",
+        "resolution": 0.2,
+        "voxels": [
+          {
+            "i": 0,
+            "j": 0,
+            "k": 0,
+            "class_logit_delta": [
+              0.2,
+              -0.1,
+              0.0
+            ],
+            "instance_id": "car#42",
+            "merge_hint": [
+              "car#42",
+              "car#7"
+            ]
+          }
+        ]
+      }
     ]
-  }
+  },
+
+  "crc32": 1234567890
 }
