@@ -1,93 +1,85 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "L3 Semantics Delta",
+  "title": "SSHT L3 Semantics Delta Payload",
+  "description": "L3 semantics delta payload: sparse semantic updates grouped by blocks.",
   "type": "object",
-  "required": [
-    "layer",
-    "version",
-    "frame_id",
-    "blocks"
-  ],
+  "additionalProperties": false,
+
   "properties": {
-    "layer": {
-      "const": "L3_DELTA"
+    "spec_version": {
+      "type": "string",
+      "description": "Specification version, e.g., '0.1.0'."
     },
-    "version": {
-      "type": "string"
-    },
+
     "frame_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Coordinate frame of all blocks, e.g., 'world' or 'map'."
     },
+
     "blocks": {
       "type": "array",
+      "description": "Sparse blocks with voxel-level semantic updates.",
       "items": {
         "type": "object",
-        "required": [
-          "block_id",
-          "resolution",
-          "voxels"
-        ],
+        "additionalProperties": false,
         "properties": {
           "block_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Block identifier (e.g., Morton code or hashed index)."
           },
           "resolution": {
-            "type": "number"
+            "type": "number",
+            "description": "Voxel resolution in meters."
           },
           "voxels": {
             "type": "array",
+            "description": "Sparse semantic updates within this block.",
             "items": {
               "type": "object",
-              "required": [
-                "ijk"
-              ],
+              "additionalProperties": false,
               "properties": {
-                "ijk": {
-                  "type": "array",
-                  "items": {
-                    "type": "integer"
-                  },
-                  "minItems": 3,
-                  "maxItems": 3
+                "i": {
+                  "type": "integer",
+                  "description": "Voxel index i (block-local)."
                 },
-                "logit_delta": {
+                "j": {
+                  "type": "integer",
+                  "description": "Voxel index j (block-local)."
+                },
+                "k": {
+                  "type": "integer",
+                  "description": "Voxel index k (block-local)."
+                },
+
+                "class_logit_delta": {
                   "type": "array",
+                  "description": "Per-class logit deltas for this voxel.",
                   "items": {
                     "type": "number"
                   }
                 },
-                "dirichlet_delta": {
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  }
-                },
+
                 "instance_id": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Optional instance identifier for this voxel."
                 },
+
                 "merge_hint": {
                   "type": "array",
+                  "description": "Optional merge hints (e.g., candidate instance IDs to merge with).",
                   "items": {
                     "type": "string"
                   }
                 }
               },
-              "anyOf": [
-                {
-                  "required": [
-                    "logit_delta"
-                  ]
-                },
-                {
-                  "required": [
-                    "dirichlet_delta"
-                  ]
-                }
-              ]
+              "required": ["i", "j", "k"]
             }
           }
-        }
+        },
+        "required": ["block_id", "resolution", "voxels"]
       }
     }
-  }
+  },
+
+  "required": ["frame_id", "blocks"]
 }
