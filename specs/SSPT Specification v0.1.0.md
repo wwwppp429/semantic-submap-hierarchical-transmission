@@ -19,16 +19,8 @@ in our paper
 
 - **Layer**: Logical level of a submap (L1 Skeleton, L2 Geometry, L3 Semantics).
 - **Prefix-decodable**: Any prefix of received layers (e.g. L1 or L1+L2) yields a valid map.
-- **Order-independent**: Packets can be applied 
-in
- any order (commutative fusion).
-
-The detailed semantics of each layer are 
-in
- `layers.md`.
-The mathematical model is 
-in
- `prefix_model.md`.
+- **Order-independent**: Packets can be applied in any order (commutative fusion).The detailed semantics of each layer are in `layers.md`.
+The mathematical model is in `prefix_model.md`.
 
 
 ## 2. Top-level message format (JSON Lines)
@@ -37,7 +29,7 @@ All messages are UTF-8 JSON objects, one per line.
 A stream **MUST** begin with an optional header, followed by packet lines.
 
 ### 2.1 Header (Optional)
-jsonc
+```jsonc
 {
   "type": "header"
 ,
@@ -48,9 +40,10 @@ jsonc
   "crc32": 0  // Optional checksum for
  the header itself
 }
+```
 ## 2.2 Packet (Data)
 
-jsonc
+```jsonc
 {
   "type": "packet",
   "submap_id": 0,      // Integer or String ID
@@ -61,9 +54,10 @@ jsonc
   "payload": { ... },  // Layer-specific data
   "crc32": 1234567890  // Standard CRC32 of the JSON object (excluding this field)
 }
-* Implementation Requirements:
- 1. CRC32: Senders SHOULD compute crc32. Receivers MUST validate it if present.
- 2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).
+```
+* Implementation Requirements:*
+* 1. CRC32: Senders SHOULD compute crc32. Receivers MUST validate it if present.*
+* 2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).*
 
 
 ## 3. Layer identifiers and meaning (MANDATORY)
