@@ -1,56 +1,177 @@
 syntax = "proto3";
-package sspt;
 
-message Pose7 { double x=1; double y=2; double z=3; double qx=4; double qy=5; double qz=6; double qw=7; }
-message InfoMat { repeated double data = 1; } // row-major
+package ssht;
 
-message SubmapNode { string id=1; Pose7 pose=2; InfoMat info=3; }
-message Edge { string i=1; string j=2; string type=3; InfoMat info=4; }
+// Semantic Submap Hierarchical Transmission (SSHT)
+// Layered, prefix-decodable payloads + 可选的包头（SshtHeader）。
+// 这里只是“规范用”的 .proto，不是整套 SLAM 系统的实现。
 
-message L1Skeleton {
-  string version = 1;
-  string frame_id = 2;
-  double timestamp = 3;
-  repeated SubmapNode submaps = 4;
-  repeated Edge edges = 5;
+// --------------------
+// 基础类型
+// --------------------
+
+message Pose7 {
+  double x  = 1;
+  double y  = 2;
+  double z  = 3;
+  double qx = 4;
+  double qy = 5;
+  double qz = 6;
+  double qw = 7;
 }
 
+// 行优先展开的协方差 / 信息矩阵（通常 6x6）
+message InfoMat {
+  repeated double data = 1;
+}
+
+// --------------------
+// L1: Skeleton / pose graph
+// --------------------
+
+message SubmapNode {
+  // 子地图 ID（在整个地图里的唯一索引）
+  uint32 submap_id = 1;
+
+  // 子地图在公共 world/map 坐标系下的位姿
+  Pose7 pose = 2;
+
+  // 附带的信息矩阵（例如 6x6）
+  InfoMat info = 3;
+}
+
+message Edge {
+  // 边连接的两个子地图 ID
+  uint32 from_submap_id = 1;
+  uint32 to_submap_id   = 2;
+
+  // 边类型，例如 "odom" / "loop"
+  string type = 3;
+
+  // 边的信息矩阵
+  InfoMat info = 4;
+}
+
+// L1 骨架层：保证全局拓扑一致性
+message L1Skeleton {
+  // 规范版本号（例如 "0.1.0"）
+  string spec_version = 1;
+
+  // 坐标系 id（例如 "map"）
+  string frame_id = 2;
+
+  // 时间戳（秒，Unix time 或 bag time）
+  double stamp = 3;
+
+  // Pose graph 骨架
+  repeated SubmapNode nodes = 4;
+  repeated Edge       edges = 5;
+}
+
+// --------------------
+// L2: Geometry Δ（占据几何增量）
+// --------------------
+
 message VoxelUpdate {
-  repeated int32 ijk = 1; // size=3
-  double dL = 2;
-  double dd = 3;
-  double w_delta = 4;
-  double ts = 5;
+  // 体素在 block 内的整数坐标 (i, j, k)
+  int32 i = 1;
+  int32 j = 2;
+  int32 k = 3;
+
+  // 占据 log-odds 增量 ΔL
+  float delta_log_odds = 4;
+
+  // 可选附加量（如果实现里有用到的话）
+  // 例如：到表面的距离增量和权重增量
+  float delta_distance = 5;
+  float delta_weight   = 6;
 }
 
 message BlockDelta {
+  // block 标识（可以是 Morton code 或 hash index 等）
   string block_id = 1;
-  double resolution = 2;
+
+  // 体素分辨率（米）
+  float resolution = 2;
+
+  // 该 block 内被更新的稀疏体素集合
   repeated VoxelUpdate voxels = 3;
 }
 
+// L2 几何层 payload：分 block 的 occupancy 增量
 message L2Delta {
-  string version = 1;
-  string frame_id = 2;
+  string spec_version = 1;
+  string frame_id     = 2;
+
   repeated BlockDelta blocks = 3;
 }
 
+// --------------------
+// L3: Semantics Δ（语义增量）
+// --------------------
+
 message SemVoxel {
-  repeated int32 ijk = 1;
-  repeated double logit_delta = 2;
-  repeated double dirichlet_delta = 3;
-  string instance_id = 4;
-  repeated string merge_hint = 5;
+  // 体素在 block 内的整数坐标 (i, j, k)
+  int32 i = 1;
+  int32 j = 2;
+  int32 k = 3;
+
+  // 语义类别的 logit 增量（和类别顺序约定即可）
+  repeated float class_logit_delta = 4;
+
+  // 实例 ID（可选）以及 merge hint（可选）
+  string instance_id         = 5;
+  repeated string merge_hint = 6;
 }
 
 message SemBlockDelta {
-  string block_id = 1;
-  double resolution = 2;
+  string block_id   = 1;
+  float  resolution = 2;
   repeated SemVoxel voxels = 3;
 }
 
+// L3 语义层 payload
 message L3Delta {
-  string version = 1;
-  string frame_id = 2;
+  string spec_version = 1;
+  string frame_id     = 2;
+
   repeated SemBlockDelta blocks = 3;
+}
+
+// --------------------
+// 公共包头 + 完整消息
+// 和 README 里的 *_msg.json 一致
+// --------------------
+
+// 传输层包头（公共 SSHT header）
+message SshtHeader {
+  // 产生该包的机器人 ID
+  uint32 robot_id  = 1;
+
+  // 所属子地图 ID
+  uint32 submap_id = 2;
+
+  // 层编号：1 = L1 skeleton, 2 = L2 geometry, 3 = L3 semantics
+  uint32 layer     = 3;
+
+  // 对应子地图的单调版本号
+  uint32 version   = 4;
+
+  // 时间戳（与 L1Skeleton.stamp 约定一致）
+  double stamp     = 5;
+
+  // 可选：对 canonical JSON / proto 字节做的 CRC-32
+  uint32 crc32     = 6;
+}
+
+// 一条完整消息 = header + 恰好一个层的 payload
+// 对应仓库里的 *_msg.json 示例
+message SshtPacket {
+  SshtHeader header = 1;
+
+  oneof payload {
+    L1Skeleton l1 = 2;
+    L2Delta    l2 = 3;
+    L3Delta    l3 = 4;
+  }
 }
