@@ -1,19 +1,17 @@
 {
-  "layer": "L3_DELTA",
-  "version": "v0.1",
+  "spec_version": "0.1.0",
   "frame_id": "world",
+
   "blocks": [
     {
       "block_id": "b_12_5_9",
       "resolution": 0.2,
       "voxels": [
         {
-          "ijk": [
-            0,
-            0,
-            0
-          ],
-          "logit_delta": [
+          "i": 0,
+          "j": 0,
+          "k": 0,
+          "class_logit_delta": [
             0.2,
             -0.1,
             0.0
