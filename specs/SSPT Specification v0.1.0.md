@@ -50,7 +50,7 @@ A stream **MUST** begin with an optional header, followed by packet lines.
   "layer": 2,          // 1=L1, 2=L2, 3=L3 (See Section 3)
   "version": 17,       // Monotonic version per (submap, layer)
   "stamp": 171000123,  // Timestamp (ns or ms)
-  "payload": {...},  // Layer-specific data
+  "payload": { },  // Layer-specific data
   "crc32": 1234567890  // Standard CRC32 of the JSON object (excluding this field)
 }
 ```
