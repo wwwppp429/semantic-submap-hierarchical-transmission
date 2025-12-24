@@ -1,20 +1,20 @@
 {
-  "layer": "L1",
-  "version": "v0.1",
+  "spec_version": "0.1.0",
   "frame_id": "world",
-  "timestamp": 1732212345.0,
-  "submaps": [
+  "stamp": 1732212345.0,
+
+  "nodes": [
     {
-      "id": "robot1_s0",
-      "pose": [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1
-      ],
+      "submap_id": 0,
+      "pose": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "qx": 0.0,
+        "qy": 0.0,
+        "qz": 0.0,
+        "qw": 1.0
+      },
       "info": [
         100,
         0,
@@ -25,10 +25,11 @@
       ]
     }
   ],
+
   "edges": [
     {
-      "i": "robot1_s0",
-      "j": "robot1_s1",
+      "from_submap_id": 0,
+      "to_submap_id": 1,
       "type": "odom",
       "info": [
         50,
