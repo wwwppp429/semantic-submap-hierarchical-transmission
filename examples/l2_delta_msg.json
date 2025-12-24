@@ -4,10 +4,34 @@
   "layer": 2,
   "version": 1,
   "stamp": 1730000002000000000,
+
   "payload": {
-    "voxels": [
-      {"idx": [12, 6, 3], "logodds_delta": 0.85, "weight": 1.0},
-      {"idx": [12, 6, 4], "logodds_delta": -0.40, "weight": 1.0}
+    "spec_version": "0.1.0",
+    "frame_id": "world",
+
+    "blocks": [
+      {
+        "block_id": "b_12_5_9",
+        "resolution": 0.2,
+        "voxels": [
+          {
+            "i": 0,
+            "j": 0,
+            "k": 0,
+            "delta_log_odds": 0.85
+          },
+          {
+            "i": 1,
+            "j": 0,
+            "k": 0,
+            "delta_distance": -0.03,
+            "delta_weight": 1.0
+          }
+        ]
+      }
     ]
-  }
+  },
+
+  "crc32": 1234567890
 }
+
