@@ -4,12 +4,30 @@
   "layer": 1,
   "version": 1,
   "stamp": 1730000001000000000,
+
   "payload": {
-    "poses": [
-      {"id": "alpha_0007_root", "T_world_submap": [1,0,0,0, 0,1,0,0, 0,0,1,0]}
+    "layer": "L1",
+    "version": "v0.1.0",
+    "frame_id": "world",
+    "timestamp": 1730000001.0,
+
+    "submaps": [
+      {
+        "id": "alpha_0007_root",
+        "pose": [0, 0, 0, 0, 0, 0, 1],
+        "info": [1000, 0, 0, 1000, 0, 1000]
+      }
     ],
+
     "edges": [
-      {"from": "alpha_0006_root", "to": "alpha_0007_root", "type": "odom", "info": [1000,0,0, 0,1000,0, 0,0,1000]}
+      {
+        "i": "alpha_0006_root",
+        "j": "alpha_0007_root",
+        "type": "odom",
+        "info": [1000, 0, 0, 0, 1000, 0, 0, 0, 1000]
+      }
     ]
-  }
+  },
+
+  "crc32": 1234567890
 }
