@@ -13,3 +13,59 @@
     "crc": { "type": "integer", "minimum": 0 }
   }
 }
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSHTMessage",
+  "description": "Transport-level SSHT message: common header + one layered payload (L1 skeleton, L2 geometry delta, or L3 semantics delta).",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": [
+    "submap_id",
+    "robot_id",
+    "layer",
+    "version",
+    "stamp",
+    "payload"
+  ],
+
+  "properties": {
+    "submap_id": {
+      "type": "string",
+      "description": "Submap identifier this packet belongs to (e.g. 'alpha_0007')."
+    },
+
+    "robot_id": {
+      "type": "string",
+      "description": "Robot identifier that produced this packet (e.g. 'robot_alpha')."
+    },
+
+    "layer": {
+      "description": "Integer layer code: 1 = L1 skeleton, 2 = L2 geometry delta, 3 = L3 semantics delta.",
+      "type": "integer",
+      "enum": [1, 2, 3]
+    },
+
+    "version": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonic version number of this submap."
+    },
+
+    "stamp": {
+      "type": "number",
+      "description": "Timestamp (implementation-defined, e.g. seconds or nanoseconds since epoch)."
+    },
+
+    "payload": {
+      "type": "object",
+      "description": "Layer-specific payload; validated by the corresponding L1/L2/L3 payload schemas."
+    },
+
+    "crc32": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optional CRC-32 checksum of the canonical header+payload bytes."
+    }
+  }
+}
