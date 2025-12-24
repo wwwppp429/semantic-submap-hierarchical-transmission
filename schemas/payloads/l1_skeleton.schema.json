@@ -1,89 +1,98 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "L1 Skeleton Payload",
+  "title": "SSHT L1 Skeleton Payload",
+  "description": "L1 skeleton payload: submap pose-graph backbone (nodes + edges) for semantic submap hierarchical transmission.",
   "type": "object",
-  "required": [
-    "layer",
-    "version",
-    "frame_id",
-    "submaps",
-    "edges"
-  ],
+  "additionalProperties": false,
+
   "properties": {
-    "layer": {
-      "const": "L1"
+    "spec_version": {
+      "type": "string",
+      "description": "Specification version, e.g., '0.1.0'."
     },
-    "version": {
-      "type": "string"
-    },
+
     "frame_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Coordinate frame of all poses, e.g., 'world' or 'map'."
     },
-    "timestamp": {
-      "type": "number"
+
+    "stamp": {
+      "type": "number",
+      "description": "Timestamp (seconds)."
     },
-    "submaps": {
+
+    "nodes": {
       "type": "array",
+      "description": "Submap pose nodes (backbone of the pose graph).",
       "items": {
         "type": "object",
-        "required": [
-          "id",
-          "pose",
-          "info"
-        ],
+        "additionalProperties": false,
         "properties": {
-          "id": {
-            "type": "string"
+          "submap_id": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Numeric submap identifier."
           },
+
           "pose": {
-            "type": "array",
-            "items": {
-              "type": "number"
+            "type": "object",
+            "description": "SE(3) pose of the submap in the global frame.",
+            "additionalProperties": false,
+            "properties": {
+              "x":  { "type": "number" },
+              "y":  { "type": "number" },
+              "z":  { "type": "number" },
+              "qx": { "type": "number" },
+              "qy": { "type": "number" },
+              "qz": { "type": "number" },
+              "qw": { "type": "number" }
             },
-            "minItems": 7,
-            "maxItems": 7
+            "required": ["x", "y", "z", "qx", "qy", "qz", "qw"]
           },
+
           "info": {
             "type": "array",
-            "items": {
-              "type": "number"
-            }
+            "description": "Row-major information matrix entries (e.g., flattened 6x6).",
+            "items": { "type": "number" },
+            "minItems": 1
           }
-        }
+        },
+        "required": ["submap_id", "pose"]
       }
     },
+
     "edges": {
       "type": "array",
+      "description": "Pose-graph edges between submaps (odometry / loop closures).",
       "items": {
         "type": "object",
-        "required": [
-          "i",
-          "j",
-          "type",
-          "info"
-        ],
+        "additionalProperties": false,
         "properties": {
-          "i": {
-            "type": "string"
+          "from_submap_id": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Source submap id."
           },
-          "j": {
-            "type": "string"
+          "to_submap_id": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Target submap id."
           },
           "type": {
             "type": "string",
-            "enum": [
-              "odom",
-              "loop"
-            ]
+            "description": "Edge type, e.g., 'odom' or 'loop'."
           },
           "info": {
             "type": "array",
-            "items": {
-              "type": "number"
-            }
+            "description": "Row-major information matrix entries for this edge.",
+            "items": { "type": "number" },
+            "minItems": 1
           }
-        }
+        },
+        "required": ["from_submap_id", "to_submap_id", "type"]
       }
     }
-  }
+  },
+
+  "required": ["frame_id", "nodes"]
 }
