@@ -63,17 +63,20 @@ jsonc
   "crc32": 1234567890  // Standard CRC32 of the JSON object (excluding this field)
 }
 ## Implementation Requirements:
-1. CRC32: Senders SHOULD compute crc32. Receivers MUST validate it if present.
-2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).
-3. Layer identifiers and meaning (MANDATORY)
-For packet messages, the layer field defines the content type.
+## 1. CRC32: Senders SHOULD compute crc32. Receivers MUST validate it if present.
+## 2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).
+## 3. Layer identifiers and meaning (MANDATORY)
+
+For `packet` messages, the `layer` field defines the content type.
+
 | `layer` | Name | Description |
 | :--- | :--- | :--- |
-| 1 | L1 Skeleton | **Mandatory.** Pose graph nodes, edges, and minimal meta-data. Ensures global consistency. |
-| 2 | L2 Geometry Δ | **Optional.** Sparse occupancy or TSDF increments (log-odds). Fused via addition+clamping. |
-| 3 | L3 Semantics Δ | **Optional.** Semantic class counts or instance hints. Fused via histogram accumulation. |
+| **1** | **L1 Skeleton** | **Mandatory.** Pose graph nodes, edges, and minimal meta-data. Ensures global consistency. |
+| **2** | **L2 Geometry Δ** | **Optional.** Sparse occupancy or TSDF increments (log-odds). Fused via addition+clamping. |
+| **3** | **L3 Semantics Δ** | **Optional.** Semantic class counts or instance hints. Fused via histogram accumulation. |
 
-See layers.md for the normative definition of payloads.
+*See `layers.md` for the normative definition of payloads.*
+
 
 ## 4. Transmission & Interruption Model
 1. Priority: The sender transmits layers in decreasing utility-to-cost ratio:
