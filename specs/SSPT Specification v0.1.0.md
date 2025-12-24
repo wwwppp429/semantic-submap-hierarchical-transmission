@@ -50,7 +50,7 @@ jsonc
 }
 ## 2.2 Packet (Data)
 
-
+jsonc
 {
   "type": "packet",
   "submap_id": 0,      // Integer or String ID
@@ -63,7 +63,9 @@ jsonc
 }
 * Implementation Requirements:
  1. CRC32: Senders SHOULD compute crc32. Receivers MUST validate it if present.
- 2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).*
+ 2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).
+
+
 ## 3. Layer identifiers and meaning (MANDATORY)
 
 For `packet` messages, the `layer` field defines the content type.
