@@ -10,13 +10,13 @@ and to the demo scripts in `scripts/`.
 
 ## 1. Packets as increments
 
-For each submap we have a collection of packets
+For each submap we have a collection of packets:
 
-\[
+$$
 \mathcal{P} = \{ p_1, p_2, \dots, p_N \}
-\]
+$$
 
-where each packet \(p_i\) belongs to one of the three layers:
+where each packet $p_i$ belongs to one of the three layers:
 
 - L1: skeleton / pose-graph information,
 - L2: log-odds increments for occupancy,
@@ -25,11 +25,11 @@ where each packet \(p_i\) belongs to one of the three layers:
 Conceptually, a packet is an **increment** that updates the current map
 state:
 
-\[
-\text{state} \leftarrow F(\text{state}, p_i).
-\]
+$$
+\text{state} \leftarrow F(\text{state}, p_i)
+$$
 
-Our goal is to design \(F\) so that:
+Our goal is to design $F$ so that:
 
 1. Applying any subset of packets still gives a valid map (prefix
    property).
@@ -40,27 +40,27 @@ Our goal is to design \(F\) so that:
 
 ## 2. Occupancy: additive log-odds with clamping
 
-Let \(L(n)\) denote the log-odds of voxel \(n\), stored in integer form
+Let $L(n)$ denote the log-odds of voxel $n$, stored in integer form
 `Lq(n)`:
 
-\[
-L(n) = \frac{1}{q_\text{scale}} L_q(n),
+$$
+L(n) = \frac{1}{q_{\text{scale}}} L_q(n),
 \qquad
-L_q(n) \in [-L_{\max}, L_{\max}] \subset \mathbb{Z}.
-\]
+L_q(n) \in [-L_{\max}, L_{\max}] \subset \mathbb{Z}
+$$
 
-An L2 packet provides indices \(I\) and increments \(\Delta L_q\):
+An L2 packet provides indices $I$ and increments $\Delta L_q$:
 
-\[
-\{ (n, \Delta L_q(n)) : n \in I \}.
-\]
+$$
+\{ (n, \Delta L_q(n)) : n \in I \}
+$$
 
-The update rule is
+The update rule is:
 
-\[
-L_q(n) \leftarrow \mathrm{clip}\big(L_q(n) + \Delta L_q(n),
-  -L_{\max}, L_{\max}\big).
-\]
+$$
+L_q(n) \leftarrow \text{clip}\big(L_q(n) + \Delta L_q(n),
+  -L_{\max}, L_{\max}\big)
+$$
 
 Because integer addition and clipping are both commutative and
 associative, any set of L2 packets defines a well-posed result that does
@@ -73,21 +73,21 @@ implement.
 
 ## 3. Semantics: per-voxel class counts
 
-For semantics we maintain, for each voxel \(n\), a small histogram of
+For semantics we maintain, for each voxel $n$, a small histogram of
 class counts:
 
-\[
-\mathbf{c}(n) = (c_1(n), \dots, c_{C}(n)).
-\]
+$$
+\mathbf{c}(n) = (c_1(n), \dots, c_{C}(n))
+$$
 
-An L3 packet provides pairs \((n, k)\) meaning “vote class \(k\) at
-voxel \(n\) once”. The update is
+An L3 packet provides pairs $(n, k)$ meaning “vote class $k$ at
+voxel $n$ once”. The update is:
 
-\[
+$$
 c_k(n) \leftarrow c_k(n) + 1,
 \qquad
-\hat{k}(n) = \arg\max_j c_j(n).
-\]
+\hat{k}(n) = \arg\max_j c_j(n)
+$$
 
 Again this is commutative and associative, so any subset of votes can be
 accumulated in any order.
@@ -96,8 +96,8 @@ accumulated in any order.
 
 ## 4. Prefix-decodable map
 
-If we denote by \(S\) the subset of packets that has been received so
-far, the map derived from \(S\) is:
+If we denote by $S$ the subset of packets that has been received so
+far, the map derived from $S$ is:
 
 - globally consistent (thanks to L1),
 - geometrically meaningful if some L2 packets have been applied, and
@@ -105,9 +105,9 @@ far, the map derived from \(S\) is:
 
 Formally, any monotone sequence of subsets
 
-\[
+$$
 S_1 \subseteq S_2 \subseteq \dots \subseteq S_T
-\]
+$$
 
 corresponds to a sequence of maps with non-decreasing information
 content. In other words, the system can be interrupted after any
@@ -121,10 +121,10 @@ instance of this model.
 
 ## 5. Relation to the convex allocation model
 
-In the paper, each layer increment \((k,\ell)\) is associated with:
+In the paper, each layer increment $(k,\ell)$ is associated with:
 
-- a cost \(\Delta c_{k,\ell}\) in bytes, and
-- a utility gain \(\Delta u_{k,\ell}\) in terms of geometry / semantics /
+- a cost $\Delta c_{k,\ell}$ in bytes, and
+- a utility gain $\Delta u_{k,\ell}$ in terms of geometry / semantics /
   risk reduction.
 
 The per-round bandwidth allocation optimizes how much rate to assign to
