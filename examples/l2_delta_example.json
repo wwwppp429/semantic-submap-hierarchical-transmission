@@ -1,28 +1,24 @@
 {
-  "layer": "L2_DELTA",
-  "version": "v0.1",
+  "spec_version": "0.1.0",
   "frame_id": "world",
+
   "blocks": [
     {
       "block_id": "b_12_5_9",
       "resolution": 0.2,
       "voxels": [
         {
-          "ijk": [
-            0,
-            0,
-            0
-          ],
-          "dL": 0.85
+          "i": 0,
+          "j": 0,
+          "k": 0,
+          "delta_log_odds": 0.85
         },
         {
-          "ijk": [
-            1,
-            0,
-            0
-          ],
-          "dd": -0.03,
-          "w_delta": 1.0
+          "i": 1,
+          "j": 0,
+          "k": 0,
+          "delta_distance": -0.03,
+          "delta_weight": 1.0
         }
       ]
     }
