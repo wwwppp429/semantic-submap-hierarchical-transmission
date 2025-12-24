@@ -1,10 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Layer Enum",
-  "type": "string",
+  "title": "SSHT Layer Code",
+  "description": "Integer layer code used in SSHT headers: 1 = L1 skeleton, 2 = L2 geometry delta, 3 = L3 semantics delta.",
+  "type": "integer",
   "enum": [
-    "L1",
-    "L2_DELTA",
-    "L3_DELTA"
+    1,
+    2,
+    3
   ]
 }
