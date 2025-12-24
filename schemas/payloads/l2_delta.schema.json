@@ -1,85 +1,81 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "L2 Geometry Delta",
+  "title": "SSHT L2 Geometry Delta Payload",
+  "description": "L2 geometry delta payload: sparse occupancy / distance / weight updates grouped by blocks.",
   "type": "object",
-  "required": [
-    "layer",
-    "version",
-    "frame_id",
-    "blocks"
-  ],
+  "additionalProperties": false,
+
   "properties": {
-    "layer": {
-      "const": "L2_DELTA"
+    "spec_version": {
+      "type": "string",
+      "description": "Specification version, e.g., '0.1.0'."
     },
-    "version": {
-      "type": "string"
-    },
+
     "frame_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Coordinate frame of all blocks, e.g., 'world' or 'map'."
     },
+
     "blocks": {
       "type": "array",
+      "description": "Sparse blocks with voxel-level geometry updates.",
       "items": {
         "type": "object",
-        "required": [
-          "block_id",
-          "resolution",
-          "voxels"
-        ],
+        "additionalProperties": false,
         "properties": {
           "block_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Block identifier (e.g., Morton code or hashed index)."
           },
           "resolution": {
-            "type": "number"
+            "type": "number",
+            "description": "Voxel resolution in meters."
           },
           "voxels": {
             "type": "array",
+            "description": "Sparse voxel updates within this block.",
             "items": {
               "type": "object",
-              "required": [
-                "ijk"
-              ],
+              "additionalProperties": false,
               "properties": {
-                "ijk": {
-                  "type": "array",
-                  "items": {
-                    "type": "integer"
-                  },
-                  "minItems": 3,
-                  "maxItems": 3
+                "i": {
+                  "type": "integer",
+                  "description": "Voxel index i (block-local)."
                 },
-                "dL": {
-                  "type": "number"
+                "j": {
+                  "type": "integer",
+                  "description": "Voxel index j (block-local)."
                 },
-                "dd": {
-                  "type": "number"
+                "k": {
+                  "type": "integer",
+                  "description": "Voxel index k (block-local)."
                 },
-                "w_delta": {
-                  "type": "number"
+
+                "delta_log_odds": {
+                  "type": "number",
+                  "description": "Occupancy log-odds delta for this voxel."
                 },
-                "ts": {
-                  "type": "number"
+                "delta_distance": {
+                  "type": "number",
+                  "description": "Optional distance-field delta for this voxel."
+                },
+                "delta_weight": {
+                  "type": "number",
+                  "description": "Optional integration weight delta."
                 }
               },
+              "required": ["i", "j", "k"],
               "oneOf": [
-                {
-                  "required": [
-                    "dL"
-                  ]
-                },
-                {
-                  "required": [
-                    "dd",
-                    "w_delta"
-                  ]
-                }
+                { "required": ["delta_log_odds"] },
+                { "required": ["delta_distance", "delta_weight"] }
               ]
             }
           }
-        }
+        },
+        "required": ["block_id", "resolution", "voxels"]
       }
     }
-  }
+  },
+
+  "required": ["frame_id", "blocks"]
 }
