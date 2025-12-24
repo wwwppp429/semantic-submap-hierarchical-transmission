@@ -37,8 +37,7 @@ A stream **MUST** begin with an optional header, followed by packet lines.
 ,
   "note": "Demo trace."
 ,
-  "crc32": 0  // Optional checksum for
- the header itself
+  "crc32": 0  // Optional checksum for the header itself
 }
 ```
 ## 2.2 Packet (Data)
@@ -55,9 +54,9 @@ A stream **MUST** begin with an optional header, followed by packet lines.
   "crc32": 1234567890  // Standard CRC32 of the JSON object (excluding this field)
 }
 ```
-* Implementation Requirements:*
-* 1. CRC32: Senders SHOULD compute crc32. Receivers MUST validate it if present.*
-* 2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).*
+* Implementation Requirements:
+ 1. CRC32: Senders SHOULD compute crc32. Receivers MUST validate it if present.
+ 2. Ignorance: Receivers MUST ignore unknown fields (forward compatibility).
 
 
 ## 3. Layer identifiers and meaning (MANDATORY)
@@ -82,7 +81,7 @@ The receiver keeps the "highest received layer" h_k(t) for each submap.
 ## 5. Payload Encoding
 To keep JSON compact, binary payloads (like voxel arrays) use a b64z container:
 
-
+```jsonc
 {
   "codec": "b64z"
 ,
@@ -92,3 +91,4 @@ To keep JSON compact, binary payloads (like voxel arrays) use a b64z container:
 : [1024],
   "data": "<base64_string_of_zlib_compressed_bytes>"
 }
+```
