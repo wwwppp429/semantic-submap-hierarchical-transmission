@@ -37,8 +37,8 @@ It is a lightweight companion repo that provides **figures + a concise L1/L2/L3 
   </p>
 
   <p align="center">
-    <a href="diagrams/q1.png"><img src="diagrams/q1.png" width="48%"/></a>
-    <a href="diagrams/q2.png"><img src="diagrams/q2.png" width="48%"/></a>
+    <a href="diagrams/q1.pdf"><img src="diagrams/q1.pdf" width="48%"/></a>
+    <a href="diagrams/q2.pdf"><img src="diagrams/q2.pdf" width="48%"/></a>
   </p>
 
 </details>
